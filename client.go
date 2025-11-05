@@ -162,6 +162,46 @@ func (mb *client) ReadHoldingRegisters(ctx context.Context, address, quantity ui
 
 // Request:
 //
+//	Function code         : 1 byte (0x03)
+//	Starting address      : 2 bytes
+//	Quantity of registers : 2 bytes
+//
+// Response:
+//
+//	Function code         : 1 byte (0x03)
+//	Byte count            : 2 byte
+//	Register value        : Nx2 bytes
+func (mb *client) ReadHoldingRegistersCustomLength(ctx context.Context, address, quantity uint16) (results []byte, err error) {
+	if quantity < 1 || quantity > 725 {
+		err = fmt.Errorf("modbus: quantity '%v' must be between '%v' and '%v',", quantity, 1, 725)
+		return
+	}
+	request := ProtocolDataUnit{
+		FunctionCode: FuncCodeReadHoldingRegisters,
+		Data:         dataBlock(address, quantity),
+	}
+	response, err := mb.send(ctx, &request)
+	if err != nil {
+		return
+	}
+	count := int(response.Data[0])
+	length := len(response.Data) - 1
+	if count != length {
+		err = &DataSizeError{ExpectedBytes: count, ActualBytes: length}
+		if length < count {
+			return
+		}
+	}
+	if count != 2*int(quantity) {
+		err = fmt.Errorf("modbus: response data size '%v' does not match request quantity '%v'", length, quantity)
+		return
+	}
+	results = response.Data[1 : count+1]
+	return
+}
+
+// Request:
+//
 //	Function code         : 1 byte (0x04)
 //	Starting address      : 2 bytes
 //	Quantity of registers : 2 bytes
