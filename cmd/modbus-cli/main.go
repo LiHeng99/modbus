@@ -20,7 +20,7 @@ import (
 
 	"github.com/grid-x/serial"
 
-	"github.com/grid-x/modbus"
+	"github.com/LiHeng99/modbus"
 )
 
 func main() {

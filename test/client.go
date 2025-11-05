@@ -8,7 +8,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/grid-x/modbus"
+	"github.com/LiHeng99/modbus"
 )
 
 func ClientTestReadCoils(t *testing.T, client modbus.Client) {
